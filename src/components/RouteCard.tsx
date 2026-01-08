@@ -29,15 +29,18 @@ export const RouteCard = ({ destination, routeInfo, onCancel }: Props) => {
 const styles = StyleSheet.create({
   routeCard: {
     position: 'absolute',
-    bottom: 40, 
-    left: 20, 
+    bottom: 110, 
+    left: 20,
     right: 20,
     backgroundColor: 'white',
-    padding: 15,
-    borderRadius: 12,
+    padding: 20,
+    borderRadius: 16,
     shadowColor: '#000',
-    shadowOpacity: 0.15,
-    elevation: 5
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 10,
+    zIndex: 20, // Asegura que esté por encima de todo
   },
   routeTitle: { fontWeight: 'bold', fontSize: 16, marginBottom: 10, color: '#333' },
   routeRow: { flexDirection: 'row', justifyContent: 'space-around', marginBottom: 10 },

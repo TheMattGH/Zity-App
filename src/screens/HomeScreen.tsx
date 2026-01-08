@@ -1,4 +1,5 @@
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as Location from 'expo-location';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, StyleSheet, View } from 'react-native';
@@ -13,9 +14,13 @@ import { CustomMarker } from '../components/CustomMarker';
 import { RouteCard } from '../components/RouteCard';
 import { estimateWalkingTime, getDistanceFromLatLonInKm } from '../utils/mapHelpers';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
+type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
+type HomeScreenRouteProp = RouteProp<RootStackParamList, 'Home'>;
 
-export default function HomeScreen({ navigation, route }: Props) {
+export default function HomeScreen() {
+  const navigation = useNavigation<HomeScreenNavigationProp>();
+  const route = useRoute<HomeScreenRouteProp>();
+
   // 1. Estados de Datos
   const [locations, setLocations] = useState<LocationModel[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -119,7 +124,6 @@ export default function HomeScreen({ navigation, route }: Props) {
           longitudeDelta: 0.0121,
         }}
       >
-        {/* Renderizado de tus MARCADORES PERSONALIZADOS */}
         {locations.map((place) => (
           <CustomMarker 
             key={place.id} 
