@@ -1,98 +1,171 @@
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, StyleSheet, Text, View } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import * as Location from 'expo-location';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Alert, StyleSheet, View } from 'react-native';
+import MapView, { Polyline } from 'react-native-maps';
+
+// Servicios y Tipos
 import { supabase } from '../services/supabase';
-import { Location, RootStackParamList } from '../types';
+import { LocationModel, RootStackParamList, RouteInfo } from '../types';
+
+// Componentes y Utilidades (Lo nuevo modular)
+import { CustomMarker } from '../components/CustomMarker';
+import { RouteCard } from '../components/RouteCard';
+import { estimateWalkingTime, getDistanceFromLatLonInKm } from '../utils/mapHelpers';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
-export default function HomeScreen({ navigation }: Props) {
-    // Estado para guardar los lugares
-    const [locations, setLocations] = useState<Location[]>([]);
-    // Estado para saber si está cargando
-    const [loading, setLoading] = useState<boolean>(true);
+export default function HomeScreen({ navigation, route }: Props) {
+  // 1. Estados de Datos
+  const [locations, setLocations] = useState<LocationModel[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  
+  // 2. Estados de Navegación y Ubicación
+  const [userLocation, setUserLocation] = useState<Location.LocationObject | null>(null);
+  const [destination, setDestination] = useState<LocationModel | null>(null);
+  const [routeInfo, setRouteInfo] = useState<RouteInfo | null>(null);
 
-    // useEffect = @PostConstruct. Se ejecuta al iniciar la pantalla.
-    useEffect(() => {
-        fetchLocations();
-    }, []);
+  const mapRef = useRef<MapView>(null);
 
-    // Función asíncrona para pedir datos a Supabase
-    const fetchLocations = async (): Promise<void> => {
-        try {
-            setLoading(true);
-            // SELECT * FROM locations
-            const { data, error } = await supabase
-                .from('locations')
-                .select('*');
+  // Inicialización
+  useEffect(() => {
+    (async () => {
+      await getUserLocation();
+      await fetchLocations();
+    })();
+  }, []);
 
-            if (error) {
-                throw error;
-            }
+  // Lógica para trazar la ruta
+  const handleNewRoute = useCallback((target: LocationModel) => {
+    if (!userLocation) return;
 
-            // Si todo sale bien, guardamos los datos en el estado
-            if (data) {
-                setLocations(data as Location[]);
-            }
-        } catch (error: unknown) {
-            const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-            Alert.alert('Error', 'No se pudieron cargar los lugares: ' + errorMessage);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // Si está cargando, mostramos un spinner
-    if (loading) {
-        return (
-            <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#0000ff" />
-                <Text>Cargando mapa de Cuenca...</Text>
-            </View>
-        );
-    }
-
-    return (
-        <View style={styles.container}>
-            <MapView
-                style={styles.map}
-                initialRegion={{
-                    latitude: -2.8974, // Coordenadas del Parque Calderón
-                    longitude: -79.0045,
-                    latitudeDelta: 0.015, // Zoom inicial
-                    longitudeDelta: 0.0121,
-                }}
-            >
-                {/* Recorremos la lista de lugares y creamos un Marcador por cada uno */}
-                {locations.map((place) => (
-                    <Marker
-                        key={place.id}
-                        coordinate={{
-                            latitude: place.latitude,
-                            longitude: place.longitude,
-                        }}
-                        title={place.name}
-                        description={place.description}
-                        onCalloutPress={() => navigation.navigate('Detail', { place })}
-                    />
-                ))}
-            </MapView>
-        </View>
+    const dist = getDistanceFromLatLonInKm(
+      userLocation.coords.latitude, userLocation.coords.longitude,
+      target.latitude, target.longitude
     );
+
+    setDestination(target);
+    setRouteInfo({
+      distance: dist,
+      time: estimateWalkingTime(dist)
+    });
+
+    // Hacemos zoom para que se vean ambos puntos (tú y el destino)
+    mapRef.current?.fitToCoordinates([
+      { latitude: userLocation.coords.latitude, longitude: userLocation.coords.longitude },
+      { latitude: target.latitude, longitude: target.longitude }
+    ], { edgePadding: { top: 100, right: 50, bottom: 100, left: 50 }, animated: true });
+
+    // Limpiamos el parámetro para que no se quede "pegado"
+    navigation.setParams({ targetLocation: undefined });
+  }, [userLocation, navigation]);
+
+  // Escuchar si venimos de "Detalle" con una orden de ruta
+  useEffect(() => {
+    if (route.params?.targetLocation && userLocation) {
+      handleNewRoute(route.params.targetLocation);
+    }
+  }, [route.params?.targetLocation, userLocation, handleNewRoute]);
+
+  const getUserLocation = async () => {
+    try {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permiso denegado', 'Necesitamos tu ubicación para guiarte.');
+        return;
+      }
+      let location = await Location.getCurrentPositionAsync({});
+      setUserLocation(location);
+    } catch (e) { console.log(e); }
+  };
+
+  const fetchLocations = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase.from('locations').select('*');
+      if (error) throw error;
+      if (data) setLocations(data as LocationModel[]);
+    } catch (error: any) {
+      Alert.alert('Error', error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const cancelNavigation = () => {
+    setDestination(null);
+    setRouteInfo(null);
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.container}>
+      <MapView
+        ref={mapRef}
+        style={styles.map}
+        showsUserLocation={true}      // Muestra punto azul
+        showsMyLocationButton={true}  // Botón para centrar
+        initialRegion={{
+          latitude: -2.8974,
+          longitude: -79.0045,
+          latitudeDelta: 0.015,
+          longitudeDelta: 0.0121,
+        }}
+      >
+        {/* Renderizado de tus MARCADORES PERSONALIZADOS */}
+        {locations.map((place) => (
+          <CustomMarker 
+            key={place.id} 
+            place={place} 
+            onPress={() => navigation.navigate('Detail', { place })} 
+          />
+        ))}
+
+        {/* Renderizado de la RUTA (Línea Azul Punteada) */}
+        {userLocation && destination && (
+          <Polyline
+            coordinates={[
+              { latitude: userLocation.coords.latitude, longitude: userLocation.coords.longitude },
+              { latitude: destination.latitude, longitude: destination.longitude }
+            ]}
+            strokeColor="#007AFF"
+            strokeWidth={4}
+            lineDashPattern={[10, 5]} // Efecto punteado
+          />
+        )}
+      </MapView>
+
+      {/* Renderizado de la TARJETA DE INFO (Flotante abajo) */}
+      {destination && routeInfo && (
+        <RouteCard 
+          destination={destination} 
+          routeInfo={routeInfo} 
+          onCancel={cancelNavigation} 
+        />
+      )}
+    </View>
+  );
 }
 
+// Estilos SOLO del contenedor principal
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
-    map: {
-        width: '100%',
-        height: '100%',
-    },
-    loadingContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
+  container: {
+    flex: 1,
+  },
+  map: {
+    width: '100%',
+    height: '100%',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });
