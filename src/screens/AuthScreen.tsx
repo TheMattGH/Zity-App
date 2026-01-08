@@ -1,20 +1,32 @@
-import { useNavigation } from '@react-navigation/native';
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React, { useState } from 'react';
-import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from '../services/supabase';
 import { RootStackParamList } from '../types';
 
+// Imagen del logo
+const splashImage = require('../../assets/images/splash-icon.png');
+
 type AuthScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Auth'>;
+type AuthScreenRouteProp = RouteProp<RootStackParamList, 'Auth'>;
 
 export default function AuthScreen() {
   const navigation = useNavigation<AuthScreenNavigationProp>();
+  const route = useRoute<AuthScreenRouteProp>();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
+
+  // Leer parámetro para saber si mostrar registro o login
+  useEffect(() => {
+    if (route.params?.isRegister) {
+      setIsLogin(false);
+    }
+  }, [route.params]);
 
   async function handleAuth() {
     if (!email || !password) {
@@ -97,7 +109,7 @@ export default function AuthScreen() {
           </TouchableOpacity>
 
           <View style={styles.headerContainer}>
-            <Text style={styles.emoji}>🏙️</Text> 
+            <Image source={splashImage} style={styles.logoImage} resizeMode="contain" />
             <Text style={styles.title}>Bienvenido a Zity</Text>
             <Text style={styles.subtitle}>
               {isLogin 
@@ -220,8 +232,9 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 30,
   },
-  emoji: { 
-    fontSize: 60, 
+  logoImage: { 
+    width: 100, 
+    height: 100, 
     marginBottom: 16 
   },
   title: { 

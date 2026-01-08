@@ -153,7 +153,11 @@ export default function ProfileScreen() {
   };
 
   const handleLogin = () => {
-    navigation.navigate('Auth');
+    navigation.navigate('Auth', { isRegister: false });
+  };
+
+  const handleRegister = () => {
+    navigation.navigate('Auth', { isRegister: true });
   };
 
   const handlePlacePress = (place: LocationModel) => {
@@ -188,7 +192,7 @@ export default function ProfileScreen() {
             <Text style={styles.loginButtonText}>Iniciar Sesión</Text>
           </TouchableOpacity>
           
-          <TouchableOpacity style={styles.registerButton} onPress={handleLogin}>
+          <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
             <Text style={styles.registerButtonText}>Crear Cuenta</Text>
           </TouchableOpacity>
 
