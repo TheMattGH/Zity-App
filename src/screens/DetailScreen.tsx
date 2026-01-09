@@ -1,9 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Animated, Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Animated, Image, Platform, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '../services/supabase';
+import { detailStyles as styles } from '../styles/screens/detailStyles';
 import { RootStackParamList } from '../types';
 
 // Tipado correcto para las props de navegación
@@ -96,7 +97,7 @@ export default function DetailScreen({ route, navigation }: Props) {
         .single();
 
       setIsFav(!!data);
-    } catch { 
+    } catch {
       setIsFav(false);
     }
   }, [place.id]);
@@ -110,7 +111,7 @@ export default function DetailScreen({ route, navigation }: Props) {
   const handleToggleFavorite = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      
+
       // Si no hay usuario, pedimos que inicie sesión
       if (!user) {
         Alert.alert(
@@ -118,8 +119,8 @@ export default function DetailScreen({ route, navigation }: Props) {
           'Para guardar lugares favoritos necesitas una cuenta. ¿Deseas iniciar sesión?',
           [
             { text: 'Ahora no', style: 'cancel' },
-            { 
-              text: 'Iniciar Sesión', 
+            {
+              text: 'Iniciar Sesión',
               onPress: () => navigation.navigate('Auth')
             }
           ]
@@ -134,14 +135,14 @@ export default function DetailScreen({ route, navigation }: Props) {
           .delete()
           .eq('user_id', user.id)
           .eq('location_id', place.id);
-        
+
         if (!error) setIsFav(false);
       } else {
         // SI NO ES FAVORITO -> INSERTAMOS
         const { error } = await supabase
           .from('favorites')
           .insert({ user_id: user.id, location_id: place.id });
-        
+
         if (!error) setIsFav(true);
       }
       animateFavorite();
@@ -152,7 +153,7 @@ export default function DetailScreen({ route, navigation }: Props) {
 
   // ESTA ES LA FUNCIÓN CLAVE
   const handleNavigation = () => {
-   navigation.navigate('MainTabs', {
+    navigation.navigate('MainTabs', {
       screen: 'Mapa',
       params: { targetLocation: place },
     } as any);
@@ -163,19 +164,19 @@ export default function DetailScreen({ route, navigation }: Props) {
 
   return (
     <ScrollView style={styles.container}>
-      <Image source={{ uri: place.image_url }} style={styles.image} resizeMode="cover"/>
+      <Image source={{ uri: place.image_url }} style={styles.image} resizeMode="cover" />
 
       {/* Botón de volver flotante */}
-      <TouchableOpacity 
-        style={[styles.backButton, { top: favButtonTop }]} 
+      <TouchableOpacity
+        style={[styles.backButton, { top: favButtonTop }]}
         onPress={() => navigation.goBack()}
       >
         <Ionicons name="arrow-back" size={22} color="#333" />
       </TouchableOpacity>
 
       {/* Botón de favorito flotante */}
-      <TouchableOpacity 
-        style={[styles.favButton, { top: favButtonTop }]} 
+      <TouchableOpacity
+        style={[styles.favButton, { top: favButtonTop }]}
         onPress={handleToggleFavorite}
       >
         <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
@@ -197,7 +198,7 @@ export default function DetailScreen({ route, navigation }: Props) {
         <View style={styles.divider} />
 
         <Text style={styles.sectionTitle}>Reseñas</Text>
-        
+
         {loading ? (
           <ActivityIndicator color="#007AFF" />
         ) : reviews.length === 0 ? (
@@ -217,80 +218,3 @@ export default function DetailScreen({ route, navigation }: Props) {
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  image: { width: '100%', height: 280 },
-  content: { padding: 20 },
-  title: { fontSize: 26, fontWeight: 'bold', color: '#333' },
-  subtitle: { fontSize: 16, color: '#666', marginTop: 4, marginBottom: 12 },
-  description: { fontSize: 16, lineHeight: 24, color: '#444' },
-  
-  // Botón de volver flotante
-  backButton: {
-    position: 'absolute',
-    left: 15,
-    backgroundColor: 'rgba(255,255,255,0.9)',
-    borderRadius: 22,
-    width: 44,
-    height: 44,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    elevation: 5,
-  },
-  // Botón de favorito flotante sobre la imagen
-  favButton: {
-    position: 'absolute',
-    right: 15,
-    backgroundColor: 'rgba(255,255,255,0.9)',
-    borderRadius: 22,
-    width: 44,
-    height: 44,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    elevation: 5,
-  },
-
-  // Estilo para el botón grande y bonito
-  navButton: {
-    backgroundColor: '#007AFF',
-    padding: 15,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
-    marginTop: 15,
-    marginBottom: 5,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    elevation: 3,
-  },
-  navButtonText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-
-  divider: { height: 1, backgroundColor: '#eee', marginVertical: 20 },
-  sectionTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 15 },
-  noReviews: { fontStyle: 'italic', color: '#888' },
-  reviewCard: { 
-    backgroundColor: '#f9f9f9', 
-    padding: 15, 
-    borderRadius: 8, 
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: '#eee'
-  },
-  reviewHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 5 },
-  userName: { fontWeight: 'bold', fontSize: 14 },
-  stars: { color: '#FFD700', fontSize: 16 },
-  comment: { fontSize: 14, color: '#555' },
-});

@@ -1,27 +1,32 @@
-// Este archivo ahora es un barrel file que re-exporta desde src/utils/map/
-// Mantiene compatibilidad con imports existentes
+// Barrel file para utilidades de mapas
+// Re-exporta todas las funciones y tipos para mantener compatibilidad
 
+// Tipos
 export type {
     Coordinate, Edge,
     Graph, Node, PathResult,
     RouteResult
-} from './map/types';
+} from './types';
 
+// Funciones de distancia
 export {
     estimateWalkingTime, getDistanceFromLatLonInKm
-} from './map/distance';
+} from './distance';
 
+// Funciones de formateo
 export {
     formatDistance, formatDuration, toPolylineCoordinates
-} from './map/formatters';
+} from './formatters';
 
+// Funciones de routing
 export {
     getCyclingRoute,
     getDrivingRoute,
     getRouteWithWaypoints, getWalkingRoute
-} from './map/routing';
+} from './routing';
 
+// Algoritmos de pathfinding
 export {
     aStar, createGraphFromPoints, dijkstra
-} from './map/pathfinding';
+} from './pathfinding';
 

@@ -1,9 +1,10 @@
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from '../services/supabase';
+import { authStyles as styles } from '../styles/screens/authStyles';
 import { RootStackParamList } from '../types';
 
 // Imagen del logo
@@ -48,7 +49,7 @@ export default function AuthScreen() {
           password: password,
         });
         if (error) throw error;
-        
+
         // Volver a la pantalla anterior después del login
         if (navigation.canGoBack()) {
           navigation.goBack();
@@ -65,9 +66,9 @@ export default function AuthScreen() {
           }
         });
         if (error) throw error;
-        
+
         Alert.alert(
-          '¡Bienvenido!', 
+          '¡Bienvenido!',
           'Tu cuenta ha sido creada exitosamente.',
           [{ text: 'OK', onPress: () => navigation.canGoBack() && navigation.goBack() }]
         );
@@ -95,11 +96,11 @@ export default function AuthScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
       >
-        <ScrollView 
+        <ScrollView
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
@@ -112,8 +113,8 @@ export default function AuthScreen() {
             <Image source={splashImage} style={styles.logoImage} resizeMode="contain" />
             <Text style={styles.title}>Bienvenido a Zity</Text>
             <Text style={styles.subtitle}>
-              {isLogin 
-                ? 'Inicia sesión para guardar tus lugares favoritos' 
+              {isLogin
+                ? 'Inicia sesión para guardar tus lugares favoritos'
                 : 'Crea tu cuenta para personalizar tu experiencia'}
             </Text>
           </View>
@@ -160,9 +161,9 @@ export default function AuthScreen() {
             </View>
           </View>
 
-          <TouchableOpacity 
-            style={[styles.button, loading && styles.buttonDisabled]} 
-            onPress={handleAuth} 
+          <TouchableOpacity
+            style={[styles.button, loading && styles.buttonDisabled]}
+            onPress={handleAuth}
             disabled={loading}
           >
             {loading ? (
@@ -201,140 +202,3 @@ export default function AuthScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: { 
-    flex: 1, 
-    backgroundColor: 'white' 
-  },
-  keyboardView: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    padding: 24,
-  },
-  closeButton: {
-    alignSelf: 'flex-end',
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#f0f0f0',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  closeButtonText: {
-    fontSize: 18,
-    color: '#666',
-  },
-  headerContainer: {
-    alignItems: 'center',
-    marginTop: 20,
-    marginBottom: 30,
-  },
-  logoImage: { 
-    width: 100, 
-    height: 100, 
-    marginBottom: 16 
-  },
-  title: { 
-    fontSize: 28, 
-    fontWeight: '800', 
-    textAlign: 'center', 
-    color: '#333', 
-    marginBottom: 8 
-  },
-  subtitle: { 
-    fontSize: 15, 
-    textAlign: 'center', 
-    color: '#666', 
-    lineHeight: 22,
-    paddingHorizontal: 20,
-  },
-  formContainer: { 
-    marginBottom: 24 
-  },
-  inputWrapper: {
-    marginBottom: 16,
-  },
-  inputLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 8,
-  },
-  input: {
-    backgroundColor: '#f9f9f9',
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-    fontSize: 16,
-    color: '#333',
-  },
-  button: {
-    backgroundColor: '#007AFF',
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginBottom: 16,
-    shadowColor: "#007AFF",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    elevation: 5,
-  },
-  buttonDisabled: {
-    opacity: 0.7,
-  },
-  buttonText: { 
-    color: 'white', 
-    fontWeight: 'bold', 
-    fontSize: 17 
-  },
-  switchButton: { 
-    alignItems: 'center',
-    paddingVertical: 8,
-  },
-  switchText: { 
-    color: '#666', 
-    fontSize: 15 
-  },
-  switchTextBold: {
-    color: '#007AFF',
-    fontWeight: '600',
-  },
-  divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 24,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#e0e0e0',
-  },
-  dividerText: {
-    marginHorizontal: 16,
-    color: '#999',
-    fontSize: 14,
-  },
-  skipButton: {
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    backgroundColor: '#f5f5f5',
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-  },
-  skipButtonText: {
-    color: '#666',
-    fontWeight: '600',
-    fontSize: 16,
-  },
-  guestNote: {
-    textAlign: 'center',
-    color: '#999',
-    fontSize: 13,
-    marginTop: 12,
-  },
-});
