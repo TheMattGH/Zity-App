@@ -1,12 +1,62 @@
-import { Ionicons } from '@expo/vector-icons'; // <--- Importamos iconos
+import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, Image, Platform, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Animated, FlatList, Image, Platform, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CategoryFilter } from '../components/CategoryFilter';
 import { supabase } from '../services/supabase';
 import { LocationModel, RootStackParamList } from '../types';
+
+// Componente de tarjeta animada
+const AnimatedCard = ({ item, index, onPress }: { item: LocationModel; index: number; onPress: () => void }) => {
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(50)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 400,
+        delay: index * 100,
+        useNativeDriver: true,
+      }),
+      Animated.spring(slideAnim, {
+        toValue: 0,
+        tension: 50,
+        friction: 8,
+        delay: index * 100,
+        useNativeDriver: true,
+      }),
+    ]).start();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
+      <TouchableOpacity 
+        activeOpacity={0.9}
+        style={styles.card} 
+        onPress={onPress}
+      >
+        <Image 
+          source={{ uri: item.image_url }} 
+          style={styles.cardImage} 
+          resizeMode="cover" 
+        />
+        <View style={styles.cardContent}>
+          <View style={styles.cardHeaderRow}>
+            <Text style={styles.cardTitle}>{item.name}</Text>
+            <View style={styles.badgeContainer}>
+              <Text style={styles.badgeText}>{item.category || 'General'}</Text>
+            </View>
+          </View>
+          <Text numberOfLines={2} style={styles.cardDescription}>{item.description}</Text>
+        </View>
+      </TouchableOpacity>
+    </Animated.View>
+  );
+};
 
 export default function ExploreScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -61,27 +111,12 @@ export default function ExploreScreen() {
     }
   };
 
-  const renderItem = ({ item }: { item: LocationModel }) => (
-    <TouchableOpacity 
-      activeOpacity={0.9}
-      style={styles.card} 
-      onPress={() => navigation.navigate('Detail', { place: item })}
-    >
-      <Image 
-        source={{ uri: item.image_url }} 
-        style={styles.cardImage} 
-        resizeMode="cover" 
-      />
-      <View style={styles.cardContent}>
-        <View style={styles.cardHeaderRow}>
-            <Text style={styles.cardTitle}>{item.name}</Text>
-            <View style={styles.badgeContainer}>
-                <Text style={styles.badgeText}>{item.category || 'General'}</Text>
-            </View>
-        </View>
-        <Text numberOfLines={2} style={styles.cardDescription}>{item.description}</Text>
-      </View>
-    </TouchableOpacity>
+  const renderItem = ({ item, index }: { item: LocationModel; index: number }) => (
+    <AnimatedCard 
+      item={item} 
+      index={index} 
+      onPress={() => navigation.navigate('Detail', { place: item })} 
+    />
   );
 
   return (
@@ -126,7 +161,7 @@ export default function ExploreScreen() {
                     
                     ListEmptyComponent={
                         <View style={styles.emptyContainer}>
-                            <Text style={styles.emptyEmoji}>🔍</Text>
+                            <Ionicons name="search-outline" size={50} color="#ccc" />
                             <Text style={styles.emptyText}>
                                 No encontramos nada con &quot;{searchQuery}&quot;
                             </Text>
@@ -231,6 +266,5 @@ const styles = StyleSheet.create({
   cardDescription: { color: '#666', fontSize: 15, lineHeight: 22 },
 
   emptyContainer: { alignItems: 'center', marginTop: 50, paddingHorizontal: 40 },
-  emptyEmoji: { fontSize: 50, marginBottom: 10 },
-  emptyText: { color: '#999', fontSize: 16, textAlign: 'center' }
+  emptyText: { color: '#999', fontSize: 16, textAlign: 'center', marginTop: 10 }
 });

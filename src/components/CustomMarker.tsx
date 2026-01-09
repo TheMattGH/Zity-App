@@ -1,5 +1,6 @@
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Marker } from 'react-native-maps';
 import { LocationModel } from '../types';
 
@@ -8,18 +9,63 @@ interface Props {
   onPress: () => void;
 }
 
+// Mapeo de categorías a iconos
+const getCategoryIcon = (category?: string): React.ComponentProps<typeof Ionicons>['name'] => {
+  switch (category?.toLowerCase()) {
+    case 'parques':
+      return 'leaf';
+    case 'museos':
+      return 'business';
+    case 'miradores':
+      return 'telescope';
+    case 'cafeterías':
+    case 'cafeterias':
+      return 'cafe';
+    case 'restaurantes':
+      return 'restaurant';
+    case 'iglesias':
+      return 'home';
+    default:
+      return 'location';
+  }
+};
+
+// Mapeo de categorías a colores
+const getCategoryColor = (category?: string): string => {
+  switch (category?.toLowerCase()) {
+    case 'parques':
+      return '#34C759';
+    case 'museos':
+      return '#AF52DE';
+    case 'miradores':
+      return '#FF9500';
+    case 'cafeterías':
+    case 'cafeterias':
+      return '#8B4513';
+    case 'restaurantes':
+      return '#FF3B30';
+    case 'iglesias':
+      return '#5856D6';
+    default:
+      return '#007AFF';
+  }
+};
+
 export const CustomMarker = ({ place, onPress }: Props) => {
+  const categoryColor = getCategoryColor(place.category);
+  const categoryIcon = getCategoryIcon(place.category);
+
   return (
     <Marker
       coordinate={{ latitude: place.latitude, longitude: place.longitude }}
-      title={place.name}
-      onCalloutPress={onPress}
+      tracksViewChanges={false}
+      onPress={onPress}
     >
       <View style={styles.markerContainer}>
-        <Text style={styles.markerEmoji}>📍</Text>
-        <View style={styles.markerBubble}>
-          <Text style={styles.markerText}>{place.name}</Text>
+        <View style={[styles.markerPin, { backgroundColor: categoryColor }]}>
+          <Ionicons name={categoryIcon} size={16} color="white" />
         </View>
+        <View style={[styles.markerArrow, { borderTopColor: categoryColor }]} />
       </View>
     </Marker>
   );
@@ -28,25 +74,29 @@ export const CustomMarker = ({ place, onPress }: Props) => {
 const styles = StyleSheet.create({
   markerContainer: {
     alignItems: 'center',
+  },
+  markerPin: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     justifyContent: 'center',
-  },
-  markerEmoji: {
-    fontSize: 30,
-  },
-  markerBubble: {
-    backgroundColor: 'white',
-    padding: 5,
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    marginTop: -5,
+    alignItems: 'center',
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
     elevation: 5,
+    borderWidth: 2,
+    borderColor: 'white',
   },
-  markerText: {
-    fontSize: 10,
-    fontWeight: 'bold',
-  }
+  markerArrow: {
+    width: 0,
+    height: 0,
+    borderLeftWidth: 6,
+    borderRightWidth: 6,
+    borderTopWidth: 8,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    marginTop: -2,
+  },
 });

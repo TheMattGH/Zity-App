@@ -1,6 +1,7 @@
+import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import React, { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Alert, Animated, Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '../services/supabase';
 import { RootStackParamList } from '../types';
@@ -22,6 +23,45 @@ export default function DetailScreen({ route, navigation }: Props) {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [isFav, setIsFav] = useState(false);
+
+  // Animaciones
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(30)).current;
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    // Animación de entrada del contenido
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 400,
+        useNativeDriver: true,
+      }),
+      Animated.spring(slideAnim, {
+        toValue: 0,
+        tension: 50,
+        friction: 8,
+        useNativeDriver: true,
+      }),
+    ]).start();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const animateFavorite = () => {
+    Animated.sequence([
+      Animated.timing(scaleAnim, {
+        toValue: 1.3,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        tension: 50,
+        friction: 3,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
 
   const fetchReviews = useCallback(async () => {
     try {
@@ -104,6 +144,7 @@ export default function DetailScreen({ route, navigation }: Props) {
         
         if (!error) setIsFav(true);
       }
+      animateFavorite();
     } catch (e) { console.log(e); }
   };
 
@@ -129,7 +170,7 @@ export default function DetailScreen({ route, navigation }: Props) {
         style={[styles.backButton, { top: favButtonTop }]} 
         onPress={() => navigation.goBack()}
       >
-        <Text style={styles.backIcon}>←</Text>
+        <Ionicons name="arrow-back" size={22} color="#333" />
       </TouchableOpacity>
 
       {/* Botón de favorito flotante */}
@@ -137,17 +178,20 @@ export default function DetailScreen({ route, navigation }: Props) {
         style={[styles.favButton, { top: favButtonTop }]} 
         onPress={handleToggleFavorite}
       >
-        <Text style={styles.favIcon}>{isFav ? '❤️' : '🤍'}</Text>
+        <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+          <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={22} color={isFav ? '#FF3B30' : '#333'} />
+        </Animated.View>
       </TouchableOpacity>
 
-      <View style={styles.content}>
+      <Animated.View style={[styles.content, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
         <Text style={styles.title}>{place.name}</Text>
         <Text style={styles.subtitle}>Cuenca, Ecuador</Text>
         <Text style={styles.description}>{place.description}</Text>
 
         {/* BOTÓN DE ACCIÓN PRINCIPAL */}
         <TouchableOpacity style={styles.navButton} onPress={handleNavigation}>
-          <Text style={styles.navButtonText}>🚶 Ver ruta a pie</Text>
+          <Ionicons name="navigate" size={20} color="white" style={{ marginRight: 8 }} />
+          <Text style={styles.navButtonText}>Ver ruta</Text>
         </TouchableOpacity>
 
         <View style={styles.divider} />
@@ -169,7 +213,7 @@ export default function DetailScreen({ route, navigation }: Props) {
             </View>
           ))
         )}
-      </View>
+      </Animated.View>
     </ScrollView>
   );
 }
@@ -197,12 +241,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     elevation: 5,
   },
-  backIcon: {
-    fontSize: 22,
-    color: '#333',
-    fontWeight: 'bold',
-  },
-
   // Botón de favorito flotante sobre la imagen
   favButton: {
     position: 'absolute',
@@ -218,9 +256,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     elevation: 5,
   },
-  favIcon: {
-    fontSize: 22,
-  },
 
   // Estilo para el botón grande y bonito
   navButton: {
@@ -228,6 +263,8 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 10,
     alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
     marginTop: 15,
     marginBottom: 5,
     shadowColor: "#000",

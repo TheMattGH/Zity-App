@@ -25,4 +25,19 @@ export type RootStackParamList = {
 export interface RouteInfo {
   distance: number; // en km
   time: number; // en minutos
+  mode: TransportMode;
 }
+
+export type TransportMode = "walking" | "cycling" | "driving";
+
+export interface TransportModeConfig {
+  key: TransportMode;
+  label: string;
+  icon: "walk" | "bicycle" | "car-sport";
+}
+
+export const TRANSPORT_MODES: TransportModeConfig[] = [
+  { key: "walking", label: "A pie", icon: "walk" },
+  { key: "cycling", label: "Bici", icon: "bicycle" },
+  { key: "driving", label: "Auto", icon: "car-sport" },
+];

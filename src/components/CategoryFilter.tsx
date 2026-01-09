@@ -1,13 +1,15 @@
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-// ... (El array de CATEGORIES sigue igual) ...
-const CATEGORIES = [
-  { id: 'Todos', emoji: '🌎' },
-  { id: 'Parques', emoji: '🌳' },
-  { id: 'Museos', emoji: '🏛️' },
-  { id: 'Miradores', emoji: '🔭' },
-  { id: 'Cafeterías', emoji: '☕' },
+type IconName = React.ComponentProps<typeof Ionicons>['name'];
+
+const CATEGORIES: { id: string; icon: IconName }[] = [
+  { id: 'Todos', icon: 'globe-outline' },
+  { id: 'Parques', icon: 'leaf-outline' },
+  { id: 'Museos', icon: 'business-outline' },
+  { id: 'Miradores', icon: 'telescope-outline' },
+  { id: 'Cafeterías', icon: 'cafe-outline' },
 ];
 
 interface Props {
@@ -32,12 +34,19 @@ export const CategoryFilter = ({ selectedCategory, onSelectCategory }: Props) =>
             ]}
             onPress={() => onSelectCategory(cat.id)}
           >
-            <Text style={[
-              styles.text,
-              selectedCategory === cat.id && styles.textSelected
-            ]}>
-              {cat.emoji} {cat.id}
-            </Text>
+            <View style={styles.chipContent}>
+              <Ionicons 
+                name={cat.icon} 
+                size={16} 
+                color={selectedCategory === cat.id ? 'white' : '#444'} 
+              />
+              <Text style={[
+                styles.text,
+                selectedCategory === cat.id && styles.textSelected
+              ]}>
+                {cat.id}
+              </Text>
+            </View>
           </TouchableOpacity>
         ))}
       </ScrollView>
@@ -78,6 +87,11 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 5,
+  },
+  chipContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
   text: {
     fontWeight: '600',

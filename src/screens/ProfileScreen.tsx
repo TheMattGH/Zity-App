@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useCallback, useState } from 'react';
@@ -182,7 +183,9 @@ export default function ProfileScreen() {
     return (
       <SafeAreaView style={styles.safeArea}>
         <ScrollView contentContainerStyle={styles.guestContainer}>
-          <Text style={styles.guestEmoji}>👤</Text>
+          <View style={styles.guestIconContainer}>
+            <Ionicons name="person-outline" size={60} color="#007AFF" />
+          </View>
           <Text style={styles.guestTitle}>Modo Invitado</Text>
           <Text style={styles.guestSubtitle}>
             Inicia sesión para guardar tus lugares favoritos y personalizar tu experiencia
@@ -198,9 +201,18 @@ export default function ProfileScreen() {
 
           <View style={styles.featuresContainer}>
             <Text style={styles.featuresTitle}>Con una cuenta podrás:</Text>
-            <Text style={styles.featureItem}>❤️ Guardar lugares favoritos</Text>
-            <Text style={styles.featureItem}>⭐ Escribir reseñas</Text>
-            <Text style={styles.featureItem}>📍 Sincronizar en todos tus dispositivos</Text>
+            <View style={styles.featureRow}>
+              <Ionicons name="heart" size={18} color="#FF3B30" />
+              <Text style={styles.featureItem}>Guardar lugares favoritos</Text>
+            </View>
+            <View style={styles.featureRow}>
+              <Ionicons name="star" size={18} color="#FFD700" />
+              <Text style={styles.featureItem}>Escribir reseñas</Text>
+            </View>
+            <View style={styles.featureRow}>
+              <Ionicons name="sync" size={18} color="#007AFF" />
+              <Text style={styles.featureItem}>Sincronizar en todos tus dispositivos</Text>
+            </View>
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -212,7 +224,7 @@ export default function ProfileScreen() {
       {/* Header del perfil */}
       <View style={styles.header}>
         <View style={styles.avatarContainer}>
-          <Text style={styles.avatar}>👤</Text>
+          <Ionicons name="person-circle" size={60} color="#007AFF" />
         </View>
         <Text style={styles.userName}>
           {userProfile?.display_name || 'Usuario'}
@@ -223,11 +235,17 @@ export default function ProfileScreen() {
           style={styles.editButton} 
           onPress={() => setEditModalVisible(true)}
         >
-          <Text style={styles.editButtonText}>✏️ Editar Perfil</Text>
+          <View style={styles.editButtonContent}>
+            <Ionicons name="pencil" size={16} color="#007AFF" />
+            <Text style={styles.editButtonText}>Editar Perfil</Text>
+          </View>
         </TouchableOpacity>
       </View>
 
-      <Text style={styles.sectionTitle}>❤️ Mis Favoritos</Text>
+      <View style={styles.sectionTitleContainer}>
+        <Ionicons name="heart" size={20} color="#FF3B30" />
+        <Text style={styles.sectionTitle}>Mis Favoritos</Text>
+      </View>
 
       {loading ? (
         <View style={styles.loadingContainer}>
@@ -235,7 +253,7 @@ export default function ProfileScreen() {
         </View>
       ) : favorites.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyEmoji}>💔</Text>
+          <Ionicons name="heart-dislike-outline" size={50} color="#999" />
           <Text style={styles.emptyText}>Aún no tienes favoritos</Text>
           <Text style={styles.emptySubtext}>Explora lugares y agrégalos a tu lista</Text>
         </View>
@@ -373,10 +391,24 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 12,
   },
+  featureRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+    gap: 10,
+  },
   featureItem: {
     fontSize: 15,
     color: '#555',
-    marginBottom: 8,
+  },
+  guestIconContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: '#E3F2FD',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
   },
 
   // Header del perfil logueado
@@ -415,18 +447,28 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f0f0',
     borderRadius: 20,
   },
+  editButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
   editButtonText: {
     color: '#007AFF',
     fontWeight: '600',
   },
 
   // Sección de favoritos
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
+  sectionTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginHorizontal: 16,
     marginTop: 20,
     marginBottom: 10,
+    gap: 8,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
   },
   loadingContainer: {
     flex: 1,

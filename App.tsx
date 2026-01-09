@@ -61,7 +61,6 @@ export default function App(): React.JSX.Element {
                 {showSplash && (
                     <Animated.View style={[styles.splashContainer, { opacity: fadeAnim }]}>
                         <Image source={splashImage} style={styles.splashImage} resizeMode="contain" />
-                        <Text style={styles.splashTitle}>Zity</Text>
                         <Text style={styles.splashSubtitle}>Descubre Cuenca</Text>
                     </Animated.View>
                 )}
