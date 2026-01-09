@@ -11,27 +11,33 @@ import { LocationModel, RootStackParamList } from '../types';
 
 // Componentes
 import { CustomMarker } from '../components/CustomMarker';
+import { MapToolbar } from '../components/MapToolbar';
 import { RouteCard } from '../components/RouteCard';
 
 // Hooks
+import { useTheme } from '../context/ThemeContext';
 import { useLocation } from '../hooks/useLocation';
 import { useRouting } from '../hooks/useRouting';
+import { homeStyles as styles } from '../styles/screens/homeStyles';
 
 // Estilos
-import { homeStyles as styles } from '../styles/screens/homeStyles';
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 type HomeScreenRouteProp = RouteProp<RootStackParamList, 'Home'>;
 
 export default function HomeScreen() {
-  const navigation = useNavigation<HomeScreenNavigationProp>();
-  const route = useRoute<HomeScreenRouteProp>();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const route = useRoute<RouteProp<RootStackParamList, 'Home'>>();
+  const { isDarkMode } = useTheme();
   const mapRef = useRef<MapView>(null);
 
   // Estados de Datos
   const [locations, setLocations] = useState<LocationModel[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedPlace, setSelectedPlace] = useState<LocationModel | null>(null);
+
+  // Estados del mapa
+  const [mapType, setMapType] = useState<'standard' | 'satellite' | 'hybrid'>('standard');
 
   // Hooks personalizados
   const { userLocation } = useLocation(mapRef);
@@ -123,6 +129,21 @@ export default function HomeScreen() {
     }
   };
 
+  // Funciones de control del mapa
+  const handleCenterLocation = () => {
+    if (userLocation && mapRef.current) {
+      mapRef.current.animateToRegion({
+        latitude: userLocation.coords.latitude,
+        longitude: userLocation.coords.longitude,
+        latitudeDelta: 0.015,
+        longitudeDelta: 0.0121,
+      }, 500);
+    }
+  };
+
+  const handleToggleMapType = () => {
+    setMapType(prev => prev === 'standard' ? 'satellite' : 'standard');
+  };
 
   // Solo mostrar loading completo al cargar inicial, no al cambiar de modo
   if (loading) {
@@ -138,8 +159,9 @@ export default function HomeScreen() {
       <MapView
         ref={mapRef}
         style={styles.map}
+        mapType={mapType}
         showsUserLocation={true}
-        showsMyLocationButton={true}
+        showsMyLocationButton={false}
         initialRegion={userLocation ? {
           latitude: userLocation.coords.latitude,
           longitude: userLocation.coords.longitude,
@@ -177,6 +199,7 @@ export default function HomeScreen() {
           style={[
             styles.selectionPanel,
             {
+              backgroundColor: isDarkMode ? '#1C1C1E' : 'white',
               transform: [
                 { scale: panelAnim },
                 {
@@ -203,8 +226,8 @@ export default function HomeScreen() {
             <View style={styles.selectionDetails}>
               <View style={styles.selectionHeader}>
                 <View style={styles.selectionInfo}>
-                  <Text style={styles.selectionTitle} numberOfLines={1}>{selectedPlace.name}</Text>
-                  <Text style={styles.selectionCategory}>{selectedPlace.category || 'Lugar'}</Text>
+                  <Text style={[styles.selectionTitle, { color: isDarkMode ? '#FFF' : '#333' }]} numberOfLines={1}>{selectedPlace.name}</Text>
+                  <Text style={[styles.selectionCategory, { color: isDarkMode ? '#B0B0B0' : '#666' }]}>{selectedPlace.category || 'Lugar'}</Text>
                 </View>
                 <TouchableOpacity
                   style={styles.closeButton}
@@ -216,12 +239,12 @@ export default function HomeScreen() {
 
               <View style={styles.selectionActions}>
                 <TouchableOpacity
-                  style={styles.actionButton}
+                  style={[styles.actionButton, { backgroundColor: isDarkMode ? '#333' : '#F2F2F7' }]}
                   onPress={handleViewInfo}
                   activeOpacity={0.7}
                 >
                   <Ionicons name="information-circle" size={22} color="#007AFF" />
-                  <Text style={styles.actionButtonText}>Info</Text>
+                  <Text style={[styles.actionButtonText, { color: isDarkMode ? '#FFF' : '#007AFF' }]}>Info</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -237,6 +260,13 @@ export default function HomeScreen() {
           </View>
         </Animated.View>
       )}
+
+      {/* Barra de herramientas del mapa */}
+      <MapToolbar
+        onCenterLocation={handleCenterLocation}
+        onToggleMapType={handleToggleMapType}
+        mapType={mapType}
+      />
 
       {/* Renderizado de la TARJETA DE INFO (Flotante abajo) */}
       {destination && routeInfo && (

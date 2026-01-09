@@ -1,7 +1,8 @@
 import * as SplashScreen from 'expo-splash-screen';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Animated, Image, StyleSheet, Text, View } from 'react-native';
+import { Animated, Image, StyleSheet, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { ThemeProvider } from './src/context/ThemeContext';
 import AppNavigator from './src/navigation/AppNavigator';
 
 // Mantener el splash screen visible mientras cargamos
@@ -34,7 +35,7 @@ export default function App(): React.JSX.Element {
         if (appIsReady) {
             // Ocultar el splash screen nativo
             await SplashScreen.hideAsync();
-            
+
             // Animar la transición
             Animated.timing(fadeAnim, {
                 toValue: 0,
@@ -53,19 +54,20 @@ export default function App(): React.JSX.Element {
     }, [appIsReady, onLayoutRootView]);
 
     return (
-        <SafeAreaProvider>
-            <View style={styles.container}>
-                <AppNavigator />
-                
-                {/* Splash screen personalizado con animación */}
-                {showSplash && (
-                    <Animated.View style={[styles.splashContainer, { opacity: fadeAnim }]}>
-                        <Image source={splashImage} style={styles.splashImage} resizeMode="contain" />
-                        <Text style={styles.splashSubtitle}>Descubre Cuenca</Text>
-                    </Animated.View>
-                )}
-            </View>
-        </SafeAreaProvider>
+        <ThemeProvider>
+            <SafeAreaProvider>
+                <View style={styles.container}>
+                    <AppNavigator />
+
+                    {/* Splash screen personalizado con animación */}
+                    {showSplash && (
+                        <Animated.View style={[styles.splashContainer, { opacity: fadeAnim }]}>
+                            <Image source={splashImage} style={styles.splashImage} resizeMode="contain" />
+                        </Animated.View>
+                    )}
+                </View>
+            </SafeAreaProvider>
+        </ThemeProvider>
     );
 }
 

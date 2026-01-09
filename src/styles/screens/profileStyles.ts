@@ -207,6 +207,24 @@ export const profileStyles = StyleSheet.create({
     marginTop: 2,
   },
 
+  // Botón de modo oscuro
+  darkModeButton: {
+    marginHorizontal: 16,
+    marginBottom: 12,
+    padding: 14,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+  },
+  darkModeText: {
+    color: '#333',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+
   // Botón cerrar sesión
   logoutButton: {
     marginHorizontal: 16,

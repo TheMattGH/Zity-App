@@ -3,12 +3,10 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Image, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTheme } from '../context/ThemeContext';
 import { supabase } from '../services/supabase';
 import { authStyles as styles } from '../styles/screens/authStyles';
 import { RootStackParamList } from '../types';
-
-// Imagen del logo
-const splashImage = require('../../assets/images/splash-icon.png');
 
 type AuthScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Auth'>;
 type AuthScreenRouteProp = RouteProp<RootStackParamList, 'Auth'>;
@@ -16,11 +14,18 @@ type AuthScreenRouteProp = RouteProp<RootStackParamList, 'Auth'>;
 export default function AuthScreen() {
   const navigation = useNavigation<AuthScreenNavigationProp>();
   const route = useRoute<AuthScreenRouteProp>();
+  const { isDarkMode } = useTheme();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
+
+  // Logo según el tema
+  const logoImage = isDarkMode
+    ? require('../../assets/images/logowhite.png')
+    : require('../../assets/images/logoblack.png');
 
   // Leer parámetro para saber si mostrar registro o login
   useEffect(() => {
@@ -95,7 +100,7 @@ export default function AuthScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: isDarkMode ? '#1C1C1E' : '#fff' }]}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
@@ -110,9 +115,11 @@ export default function AuthScreen() {
           </TouchableOpacity>
 
           <View style={styles.headerContainer}>
-            <Image source={splashImage} style={styles.logoImage} resizeMode="contain" />
-            <Text style={styles.title}>Bienvenido a Zity</Text>
-            <Text style={styles.subtitle}>
+            <Image source={logoImage} style={styles.logoImage} resizeMode="contain" />
+            <Text style={[styles.title, { color: isDarkMode ? '#FFF' : '#1a1a1a' }]}>
+              Bienvenido a Zity
+            </Text>
+            <Text style={[styles.subtitle, { color: isDarkMode ? '#B0B0B0' : '#666' }]}>
               {isLogin
                 ? 'Inicia sesión para guardar tus lugares favoritos'
                 : 'Crea tu cuenta para personalizar tu experiencia'}
@@ -122,24 +129,43 @@ export default function AuthScreen() {
           <View style={styles.formContainer}>
             {!isLogin && (
               <View style={styles.inputWrapper}>
-                <Text style={styles.inputLabel}>Nombre</Text>
+                <Text style={[styles.inputLabel, { color: isDarkMode ? '#E0E0E0' : '#333' }]}>
+                  Nombre completo
+                </Text>
                 <TextInput
-                  style={styles.input}
+                  style={[
+                    styles.input,
+                    {
+                      backgroundColor: isDarkMode ? '#2C2C2E' : '#f9f9f9',
+                      color: isDarkMode ? '#FFF' : '#333',
+                      borderColor: isDarkMode ? '#3A3A3C' : '#e0e0e0'
+                    }
+                  ]}
                   placeholder="Tu nombre"
-                  placeholderTextColor="#999"
+                  placeholderTextColor={isDarkMode ? '#8E8E93' : '#999'}
                   value={name}
                   onChangeText={setName}
                   autoCapitalize="words"
+                  autoComplete="name"
                 />
               </View>
             )}
 
             <View style={styles.inputWrapper}>
-              <Text style={styles.inputLabel}>Correo electrónico</Text>
+              <Text style={[styles.inputLabel, { color: isDarkMode ? '#E0E0E0' : '#333' }]}>
+                Correo electrónico
+              </Text>
               <TextInput
-                style={styles.input}
+                style={[
+                  styles.input,
+                  {
+                    backgroundColor: isDarkMode ? '#2C2C2E' : '#f9f9f9',
+                    color: isDarkMode ? '#FFF' : '#333',
+                    borderColor: isDarkMode ? '#3A3A3C' : '#e0e0e0'
+                  }
+                ]}
                 placeholder="correo@ejemplo.com"
-                placeholderTextColor="#999"
+                placeholderTextColor={isDarkMode ? '#8E8E93' : '#999'}
                 value={email}
                 onChangeText={setEmail}
                 autoCapitalize="none"
@@ -149,11 +175,20 @@ export default function AuthScreen() {
             </View>
 
             <View style={styles.inputWrapper}>
-              <Text style={styles.inputLabel}>Contraseña</Text>
+              <Text style={[styles.inputLabel, { color: isDarkMode ? '#E0E0E0' : '#333' }]}>
+                Contraseña
+              </Text>
               <TextInput
-                style={styles.input}
+                style={[
+                  styles.input,
+                  {
+                    backgroundColor: isDarkMode ? '#2C2C2E' : '#f9f9f9',
+                    color: isDarkMode ? '#FFF' : '#333',
+                    borderColor: isDarkMode ? '#3A3A3C' : '#e0e0e0'
+                  }
+                ]}
                 placeholder="••••••••"
-                placeholderTextColor="#999"
+                placeholderTextColor={isDarkMode ? '#8E8E93' : '#999'}
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry

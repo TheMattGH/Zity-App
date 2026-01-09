@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import React from 'react';
-import { Platform } from 'react-native'; // Importamos Platform y View
+import { Platform, StyleSheet, View } from 'react-native';
 
+import { useTheme } from '../context/ThemeContext';
 // Pantallas
 import ExploreScreen from '../screens/ExploreScreen';
 import HomeScreen from '../screens/HomeScreen';
@@ -11,53 +12,102 @@ import ProfileScreen from '../screens/ProfileScreen';
 const Tab = createBottomTabNavigator();
 
 export default function BottomTabNavigator() {
+  const { isDarkMode } = useTheme();
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarActiveTintColor: '#007AFF',
-        tabBarInactiveTintColor: '#999',
-        tabBarShowLabel: true, // Mostrar texto debajo del icono
-        
-        // AQUÍ ESTÁ EL ARREGLO VISUAL
-        tabBarStyle: {
-            position: 'absolute', // Flota sobre el fondo para permitir transparencias si quisieras
-            backgroundColor: '#ffffff',
-            borderTopWidth: 0, // Quitamos la línea fea de arriba
-            
-            // Altura dinámica: Más alto en iOS para respetar la barra negra
-            height: Platform.OS === 'ios' ? 85 : 60,
-            paddingBottom: Platform.OS === 'ios' ? 25 : 10,
-            paddingTop: 10,
+        tabBarInactiveTintColor: isDarkMode ? '#8E8E93' : '#8E8E93',
+        tabBarShowLabel: true,
 
-            // Sombras para darle profundidad (Efecto "Elevado")
-            elevation: 10, // Android
-            shadowColor: '#000', // iOS
-            shadowOffset: { width: 0, height: -5 },
-            shadowOpacity: 0.1,
-            shadowRadius: 5,
+        tabBarStyle: {
+          position: 'absolute',
+          backgroundColor: isDarkMode ? '#1C1C1E' : '#FFFFFF',
+          borderTopWidth: 0,
+
+          // Altura dinámica con más espacio
+          height: Platform.OS === 'ios' ? 88 : 65,
+          paddingBottom: Platform.OS === 'ios' ? 28 : 12,
+          paddingTop: 8,
+          paddingHorizontal: 20,
+
+          // Bordes redondeados en la parte superior
+          borderTopLeftRadius: 24,
+          borderTopRightRadius: 24,
+
+          // Sombras más pronunciadas para efecto flotante
+          elevation: 20,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -8 },
+          shadowOpacity: 0.12,
+          shadowRadius: 12,
         },
-        
-        tabBarIcon: ({ focused, color, size }) => {
+
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: '600',
+          marginTop: 4,
+        },
+
+        tabBarIcon: ({ focused, color }) => {
           let iconName: keyof typeof Ionicons.glyphMap;
+          let iconSize = focused ? 26 : 24;
 
           if (route.name === 'Mapa') {
             iconName = focused ? 'map' : 'map-outline';
           } else if (route.name === 'Explorar') {
-            iconName = focused ? 'search' : 'search-outline';
+            iconName = focused ? 'compass' : 'compass-outline';
           } else if (route.name === 'Perfil') {
-            iconName = focused ? 'person' : 'person-outline';
+            iconName = focused ? 'person-circle' : 'person-circle-outline';
           } else {
             iconName = 'alert';
           }
 
-          return <Ionicons name={iconName} size={24} color={color} />;
+          return (
+            <View style={[
+              styles.iconContainer,
+              focused && styles.iconContainerActive
+            ]}>
+              <Ionicons name={iconName} size={iconSize} color={color} />
+            </View>
+          );
         },
       })}
     >
-      <Tab.Screen name="Mapa" component={HomeScreen} />
-      <Tab.Screen name="Explorar" component={ExploreScreen} />
-      <Tab.Screen name="Perfil" component={ProfileScreen} />
+      <Tab.Screen
+        name="Mapa"
+        component={HomeScreen}
+        options={{
+          tabBarLabel: 'Mapa',
+        }}
+      />
+      <Tab.Screen
+        name="Explorar"
+        component={ExploreScreen}
+        options={{
+          tabBarLabel: 'Explorar',
+        }}
+      />
+      <Tab.Screen
+        name="Perfil"
+        component={ProfileScreen}
+        options={{
+          tabBarLabel: 'Perfil',
+        }}
+      />
     </Tab.Navigator>
   );
 }
+
+const styles = StyleSheet.create({
+  iconContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 4,
+  },
+  iconContainerActive: {
+    transform: [{ scale: 1.05 }],
+  },
+});

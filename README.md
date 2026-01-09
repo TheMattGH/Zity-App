@@ -1,7 +1,7 @@
 # 🏛️ Zity - Descubre Cuenca
 
 <p align="center">
-  <img src="assets/images/icon.png" alt="Zity Logo" width="120" height="120">
+  <img src="assets/images/splash-icon.png" alt="Zity Logo" width="120" height="120">
 </p>
 
 <p align="center">

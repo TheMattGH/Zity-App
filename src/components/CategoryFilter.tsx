@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useTheme } from '../context/ThemeContext';
 
 type IconName = React.ComponentProps<typeof Ionicons>['name'];
 
@@ -18,11 +19,12 @@ interface Props {
 }
 
 export const CategoryFilter = ({ selectedCategory, onSelectCategory }: Props) => {
+  const { isDarkMode } = useTheme();
   return (
     <View style={styles.wrapper}>
-      <ScrollView 
-        horizontal 
-        showsHorizontalScrollIndicator={false} 
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.contentContainer}
       >
         {CATEGORIES.map((cat) => (
@@ -30,18 +32,20 @@ export const CategoryFilter = ({ selectedCategory, onSelectCategory }: Props) =>
             key={cat.id}
             style={[
               styles.chip,
+              { backgroundColor: isDarkMode ? '#2C2C2E' : '#FFFFFF' },
               selectedCategory === cat.id && styles.chipSelected
             ]}
             onPress={() => onSelectCategory(cat.id)}
           >
             <View style={styles.chipContent}>
-              <Ionicons 
-                name={cat.icon} 
-                size={16} 
-                color={selectedCategory === cat.id ? 'white' : '#444'} 
+              <Ionicons
+                name={cat.icon}
+                size={16}
+                color={selectedCategory === cat.id ? 'white' : (isDarkMode ? '#FFF' : '#444')}
               />
               <Text style={[
                 styles.text,
+                { color: isDarkMode ? '#FFF' : '#333' },
                 selectedCategory === cat.id && styles.textSelected
               ]}>
                 {cat.id}
@@ -69,7 +73,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10, // Botones un poco más gorditos y fáciles de tocar
     borderRadius: 25,    // Más redondeados
     marginRight: 12,     // Más espacio entre botones
-    
+
     // Sombras más sutiles y elegantes
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },

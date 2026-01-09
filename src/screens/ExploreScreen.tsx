@@ -6,6 +6,8 @@ import { ActivityIndicator, FlatList, Text, TextInput, View } from 'react-native
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AnimatedCard } from '../components/AnimatedCard';
 import { CategoryFilter } from '../components/CategoryFilter';
+import { CustomHeader } from '../components/CustomHeader';
+import { useTheme } from '../context/ThemeContext';
 import { supabase } from '../services/supabase';
 import { exploreStyles as styles } from '../styles/screens/exploreStyles';
 import { LocationModel, RootStackParamList } from '../types';
@@ -13,6 +15,7 @@ import { LocationModel, RootStackParamList } from '../types';
 
 export default function ExploreScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const { isDarkMode } = useTheme();
 
   const [locations, setLocations] = useState<LocationModel[]>([]);
   const [filteredLocations, setFilteredLocations] = useState<LocationModel[]>([]);
@@ -73,7 +76,14 @@ export default function ExploreScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView
+      style={[styles.safeArea, { backgroundColor: isDarkMode ? '#1C1C1E' : '#f8f9fa' }]}
+      edges={['top']}
+    >
+      <CustomHeader
+        title="Descubre Cuenca"
+        subtitle={`${filteredLocations.length} lugares encontrados`}
+      />
       <View style={styles.container}>
         {loading ? (
           <ActivityIndicator style={{ marginTop: 100 }} size="large" color="#007AFF" />
@@ -87,19 +97,23 @@ export default function ExploreScreen() {
 
             // --- ENCABEZADO CON BARRA DE BÚSQUEDA ---
             ListHeaderComponent={
-              <View style={styles.headerContainer}>
-                <Text style={styles.headerTitle}>Descubre Cuenca</Text>
-
+              <View>
                 {/* BARRA DE BÚSQUEDA */}
-                <View style={styles.searchBarContainer}>
-                  <Ionicons name="search" size={20} color="#888" style={{ marginRight: 8 }} />
+                <View style={[
+                  styles.searchBarContainer,
+                  {
+                    backgroundColor: isDarkMode ? '#2C2C2E' : 'white',
+                    borderColor: isDarkMode ? '#3A3A3C' : '#eee'
+                  }
+                ]}>
+                  <Ionicons name="search" size={20} color={isDarkMode ? '#8E8E93' : '#888'} style={{ marginRight: 8 }} />
                   <TextInput
                     placeholder="Buscar lugares, cafés, parques..."
-                    style={styles.searchInput}
-                    placeholderTextColor="#999"
+                    style={[styles.searchInput, { color: isDarkMode ? '#FFF' : '#333' }]}
+                    placeholderTextColor={isDarkMode ? '#8E8E93' : '#999'}
                     value={searchQuery}
-                    onChangeText={setSearchQuery} // Actualiza estado al escribir
-                    clearButtonMode="while-editing" // Botón 'X' en iOS
+                    onChangeText={setSearchQuery}
+                    clearButtonMode="while-editing"
                   />
                 </View>
 
@@ -114,8 +128,8 @@ export default function ExploreScreen() {
 
             ListEmptyComponent={
               <View style={styles.emptyContainer}>
-                <Ionicons name="search-outline" size={50} color="#ccc" />
-                <Text style={styles.emptyText}>
+                <Ionicons name="search-outline" size={50} color={isDarkMode ? '#666' : '#ccc'} />
+                <Text style={[styles.emptyText, { color: isDarkMode ? '#B0B0B0' : '#999' }]}>
                   No encontramos nada con &quot;{searchQuery}&quot;
                 </Text>
               </View>

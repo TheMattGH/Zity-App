@@ -1,11 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useRef } from "react";
 import { ActivityIndicator, Animated, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useTheme } from '../context/ThemeContext';
 import {
-    LocationModel,
-    RouteInfo,
-    TRANSPORT_MODES,
-    TransportMode,
+  LocationModel,
+  RouteInfo,
+  TRANSPORT_MODES,
+  TransportMode,
 } from "../types";
 
 interface Props {
@@ -23,8 +24,9 @@ export const RouteCard = ({
   onModeChange,
   isLoading = false,
 }: Props) => {
+  const { isDarkMode } = useTheme();
   const currentMode = TRANSPORT_MODES.find((m) => m.key === routeInfo.mode);
-  
+
   // Animaciones
   const slideAnim = useRef(new Animated.Value(200)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -87,19 +89,20 @@ export const RouteCard = ({
 
   return (
     <Animated.View style={[
-      styles.routeCard, 
-      { 
+      styles.routeCard,
+      {
+        backgroundColor: isDarkMode ? '#1C1C1E' : 'white',
         transform: [
           { translateY: slideAnim },
           { scale: scaleAnim }
         ],
-        opacity: fadeAnim 
+        opacity: fadeAnim
       }
     ]}>
       {/* Header compacto con destino y botón cancelar */}
       <View style={styles.header}>
         <Ionicons name="navigate" size={16} color="#007AFF" />
-        <Text style={styles.destinationName} numberOfLines={1}>
+        <Text style={[styles.destinationName, { color: isDarkMode ? '#FFF' : '#333' }]} numberOfLines={1}>
           {destination.name}
         </Text>
         <TouchableOpacity onPress={handleCancel} style={styles.closeButton}>
@@ -138,7 +141,7 @@ export const RouteCard = ({
             <>
               <View style={styles.stat}>
                 <Ionicons name="resize-outline" size={14} color="#007AFF" />
-                <Text style={styles.statValue}>
+                <Text style={[styles.statValue, { color: isDarkMode ? '#B0B0B0' : '#333' }]}>
                   {formatDistance(routeInfo.distance)}
                 </Text>
               </View>
@@ -148,7 +151,7 @@ export const RouteCard = ({
                   size={14}
                   color="#34C759"
                 />
-                <Text style={styles.statValue}>{formatTime(routeInfo.time)}</Text>
+                <Text style={[styles.statValue, { color: isDarkMode ? '#B0B0B0' : '#333' }]}>{formatTime(routeInfo.time)}</Text>
               </View>
             </>
           )}

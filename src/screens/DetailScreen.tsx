@@ -3,6 +3,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Animated, Image, Platform, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTheme } from '../context/ThemeContext';
 import { supabase } from '../services/supabase';
 import { detailStyles as styles } from '../styles/screens/detailStyles';
 import { RootStackParamList } from '../types';
@@ -21,6 +22,7 @@ type Review = {
 export default function DetailScreen({ route, navigation }: Props) {
   const { place } = route.params;
   const insets = useSafeAreaInsets();
+  const { isDarkMode } = useTheme();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [isFav, setIsFav] = useState(false);
@@ -163,31 +165,48 @@ export default function DetailScreen({ route, navigation }: Props) {
   const favButtonTop = Platform.OS === 'ios' ? insets.top + 10 : insets.top + 15;
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={[styles.container, { backgroundColor: isDarkMode ? '#1C1C1E' : '#fff' }]}>
+
       <Image source={{ uri: place.image_url }} style={styles.image} resizeMode="cover" />
 
       {/* Botón de volver flotante */}
       <TouchableOpacity
-        style={[styles.backButton, { top: favButtonTop }]}
+        style={[
+          styles.backButton,
+          {
+            top: favButtonTop,
+            backgroundColor: isDarkMode ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.9)'
+          }
+        ]}
         onPress={() => navigation.goBack()}
       >
-        <Ionicons name="arrow-back" size={22} color="#333" />
+        <Ionicons name="arrow-back" size={22} color={isDarkMode ? '#FFF' : '#333'} />
       </TouchableOpacity>
 
       {/* Botón de favorito flotante */}
       <TouchableOpacity
-        style={[styles.favButton, { top: favButtonTop }]}
+        style={[
+          styles.favButton,
+          {
+            top: favButtonTop,
+            backgroundColor: isDarkMode ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.9)'
+          }
+        ]}
         onPress={handleToggleFavorite}
       >
         <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
-          <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={22} color={isFav ? '#FF3B30' : '#333'} />
+          <Ionicons
+            name={isFav ? 'heart' : 'heart-outline'}
+            size={22}
+            color={isFav ? '#FF3B30' : (isDarkMode ? '#FFF' : '#333')}
+          />
         </Animated.View>
       </TouchableOpacity>
 
       <Animated.View style={[styles.content, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
-        <Text style={styles.title}>{place.name}</Text>
-        <Text style={styles.subtitle}>Cuenca, Ecuador</Text>
-        <Text style={styles.description}>{place.description}</Text>
+        <Text style={[styles.title, { color: isDarkMode ? '#FFF' : '#333' }]}>{place.name}</Text>
+        <Text style={[styles.subtitle, { color: isDarkMode ? '#B0B0B0' : '#666' }]}>Cuenca, Ecuador</Text>
+        <Text style={[styles.description, { color: isDarkMode ? '#E0E0E0' : '#444' }]}>{place.description}</Text>
 
         {/* BOTÓN DE ACCIÓN PRINCIPAL */}
         <TouchableOpacity style={styles.navButton} onPress={handleNavigation}>
@@ -195,22 +214,31 @@ export default function DetailScreen({ route, navigation }: Props) {
           <Text style={styles.navButtonText}>Ver ruta</Text>
         </TouchableOpacity>
 
-        <View style={styles.divider} />
+        <View style={[styles.divider, { backgroundColor: isDarkMode ? '#333' : '#eee' }]} />
 
-        <Text style={styles.sectionTitle}>Reseñas</Text>
+        <Text style={[styles.sectionTitle, { color: isDarkMode ? '#FFF' : '#000' }]}>Reseñas</Text>
 
         {loading ? (
           <ActivityIndicator color="#007AFF" />
         ) : reviews.length === 0 ? (
-          <Text style={styles.noReviews}>Sé el primero en opinar.</Text>
+          <Text style={[styles.noReviews, { color: isDarkMode ? '#aaa' : '#888' }]}>Sé el primero en opinar.</Text>
         ) : (
           reviews.map((review) => (
-            <View key={review.id} style={styles.reviewCard}>
+            <View
+              key={review.id}
+              style={[
+                styles.reviewCard,
+                {
+                  backgroundColor: isDarkMode ? '#2C2C2E' : '#f9f9f9',
+                  borderColor: isDarkMode ? '#3A3A3C' : '#eee'
+                }
+              ]}
+            >
               <View style={styles.reviewHeader}>
-                <Text style={styles.userName}>{review.user_name}</Text>
+                <Text style={[styles.userName, { color: isDarkMode ? '#FFF' : '#000' }]}>{review.user_name}</Text>
                 <Text style={styles.stars}>{renderStars(review.rating)}</Text>
               </View>
-              <Text style={styles.comment}>{review.comment}</Text>
+              <Text style={[styles.comment, { color: isDarkMode ? '#D0D0D0' : '#555' }]}>{review.comment}</Text>
             </View>
           ))
         )}

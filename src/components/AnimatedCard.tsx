@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useTheme } from '../context/ThemeContext';
 import { LocationModel } from '../types';
 
 interface AnimatedCardProps {
@@ -9,6 +10,7 @@ interface AnimatedCardProps {
 }
 
 export const AnimatedCard = ({ item, index, onPress }: AnimatedCardProps) => {
+    const { isDarkMode } = useTheme();
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const slideAnim = useRef(new Animated.Value(50)).current;
 
@@ -35,7 +37,7 @@ export const AnimatedCard = ({ item, index, onPress }: AnimatedCardProps) => {
         <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
             <TouchableOpacity
                 activeOpacity={0.9}
-                style={styles.card}
+                style={[styles.card, { backgroundColor: isDarkMode ? '#2C2C2E' : 'white' }]}
                 onPress={onPress}
             >
                 <Image
@@ -45,12 +47,12 @@ export const AnimatedCard = ({ item, index, onPress }: AnimatedCardProps) => {
                 />
                 <View style={styles.cardContent}>
                     <View style={styles.cardHeaderRow}>
-                        <Text style={styles.cardTitle}>{item.name}</Text>
-                        <View style={styles.badgeContainer}>
+                        <Text style={[styles.cardTitle, { color: isDarkMode ? '#FFF' : '#333' }]}>{item.name}</Text>
+                        <View style={[styles.badgeContainer, { backgroundColor: isDarkMode ? 'rgba(0,122,255,0.2)' : '#EBF5FF' }]}>
                             <Text style={styles.badgeText}>{item.category || 'General'}</Text>
                         </View>
                     </View>
-                    <Text numberOfLines={2} style={styles.cardDescription}>{item.description}</Text>
+                    <Text numberOfLines={2} style={[styles.cardDescription, { color: isDarkMode ? '#B0B0B0' : '#666' }]}>{item.description}</Text>
                 </View>
             </TouchableOpacity>
         </Animated.View>

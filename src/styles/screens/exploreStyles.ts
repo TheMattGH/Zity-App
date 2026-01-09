@@ -1,13 +1,17 @@
-import { Platform, StatusBar, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 
 export const exploreStyles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#f8f9fa', 
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+    backgroundColor: '#f8f9fa',
   },
-  container: { flex: 1 },
-  listContent: { paddingBottom: 100 },
+  container: { 
+    flex: 1,
+  },
+  listContent: { 
+    paddingBottom: 100,
+    paddingTop: 16,
+  },
   
   headerContainer: { paddingTop: 10, paddingBottom: 5 },
   headerTitle: {
